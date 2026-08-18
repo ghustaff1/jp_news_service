@@ -1,2 +1,3 @@
 fastapi
 uvicorn
+psycorg2-binary
