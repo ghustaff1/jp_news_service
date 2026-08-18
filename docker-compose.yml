@@ -3,11 +3,21 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    networks:
+      - frontend-network
     ports:
       - "8000:8000"
   frontend:
     image: nginx:latest
     volumes:
       - ./frontend:/usr/share/nginx/html
+    networks:
+      - backend-network
+      - frontend-network
     ports:
       - "8080:80"
+
+
+networks:
+  frontend-network:
+  backend-network:
