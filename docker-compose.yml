@@ -1,4 +1,14 @@
 services:
+
+  frontend:
+    image: nginx:latest
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - backend-network
+    ports:
+      - "8080:80"
+ 
   backend:
     build:
       context: ./backend
@@ -8,14 +18,11 @@ services:
       - backend-network
     ports:
       - "8000:8000"
-  frontend:
-    image: nginx:latest
-    volumes:
-      - ./frontend:/usr/share/nginx/html
-    networks:
-      - backend-network
-    ports:
-      - "8080:80"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+ 
   db:
     image: postgres:16
     environment:
