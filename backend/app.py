@@ -15,37 +15,48 @@ def get_connection():
     )
 
 
-@app.on_event("startup")
-def create_table():
-    connection = get_connection()
-
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS news (
-            id SERIAL PRIMARY KEY,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL,
-            image_url TEXT,
-            level VARCHAR(2) NOT NULL,
-            source_url TEXT,
-            published_at TIMESTAMP
-        );
-    """)
-
-    connection.commit()
-    cursor.close()
-    connection.close()
-
-
 @app.get("/")
 def root():
     return {"message": "JP News API is working!"}
 
 
-@app.get("/db")
-def database_test():
+@app.get("/news")
+def get_news(level: str | None = None):
     connection = get_connection()
+    cursor = connection.cursor()
+
+    if level:
+        cursor.execute(
+            """
+            SELECT id, title, content, image_url, level, source_url
+            FROM news
+            WHERE level = %s
+            ORDER BY id DESC
+            """,
+            (level,),
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, title, content, image_url, level, source_url
+            FROM news
+            ORDER BY id DESC
+            """
+        )
+
+    rows = cursor.fetchall()
+
+    cursor.close()
     connection.close()
 
-    return {"database": "connected"}
+    return [
+        {
+            "id": row[0],
+            "title": row[1],
+            "content": row[2],
+            "image_url": row[3],
+            "level": row[4],
+            "source_url": row[5],
+        }
+        for row in rows
+    ]
